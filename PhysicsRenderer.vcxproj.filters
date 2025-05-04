@@ -24,6 +24,8 @@
     <ClCompile Include="Contact.cpp" />
     <ClCompile Include="Intersections.cpp" />
     <ClCompile Include="Shape.cpp" />
+    <ClCompile Include="ShapeUtils.cpp" />
+    <ClCompile Include="GJK.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Body.h" />
@@ -51,5 +53,7 @@
     <ClInclude Include="Contact.h" />
     <ClInclude Include="Intersections.h" />
     <ClInclude Include="Shape.h" />
+    <ClInclude Include="ShapeUtils.h" />
+    <ClInclude Include="GJK.h" />
   </ItemGroup>
 </Project>

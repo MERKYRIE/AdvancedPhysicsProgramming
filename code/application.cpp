@@ -67,7 +67,7 @@ Application::Initialize
 ====================================================
 */
 void Application::Initialize() {
-	//FillDiamond();
+	FillDiamond();
 
 	InitializeGLFW();
 	InitializeVulkan();

@@ -19,5 +19,7 @@ D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\code\Renderer\shader.cpp
 D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\code\Renderer\SwapChain.cpp;D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\PhysicsRenderer\x64\Debug\SwapChain.obj
 D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\code\Scene.cpp;D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\PhysicsRenderer\x64\Debug\Scene.obj
 D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\Contact.cpp;D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\PhysicsRenderer\x64\Debug\Contact.obj
+D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\GJK.cpp;D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\PhysicsRenderer\x64\Debug\GJK.obj
 D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\Intersections.cpp;D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\PhysicsRenderer\x64\Debug\Intersections.obj
 D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\Shape.cpp;D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\PhysicsRenderer\x64\Debug\Shape.obj
+D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\ShapeUtils.cpp;D:\Programs\_Studio\Projects\AdvancedPhysicsProgramming\PhysicsRenderer\x64\Debug\ShapeUtils.obj

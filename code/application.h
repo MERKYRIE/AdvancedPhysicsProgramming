@@ -19,6 +19,8 @@
 #include "Renderer/shader.h"
 #include "Renderer/FrameBuffer.h"
 
+void FillDiamond();
+
 /*
 ====================================================
 Application

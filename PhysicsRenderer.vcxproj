@@ -40,8 +40,10 @@
     <ClCompile Include="code\Renderer\SwapChain.cpp" />
     <ClCompile Include="code\Scene.cpp" />
     <ClCompile Include="Contact.cpp" />
+    <ClCompile Include="GJK.cpp" />
     <ClCompile Include="Intersections.cpp" />
     <ClCompile Include="Shape.cpp" />
+    <ClCompile Include="ShapeUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Body.h" />
@@ -67,8 +69,10 @@
     <ClInclude Include="code\Renderer\SwapChain.h" />
     <ClInclude Include="code\Scene.h" />
     <ClInclude Include="Contact.h" />
+    <ClInclude Include="GJK.h" />
     <ClInclude Include="Intersections.h" />
     <ClInclude Include="Shape.h" />
+    <ClInclude Include="ShapeUtils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

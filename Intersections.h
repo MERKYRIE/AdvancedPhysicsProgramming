@@ -14,5 +14,12 @@ public:
 		const Vec3& posA, const Vec3& posB, const Vec3& velA, const Vec3& velB,
 		const float dt, Vec3& ptOnA, Vec3& ptOnB, float& timeOfImpact);
 
+ static bool SphereSphereStatic(const ShapeSphere* sphereA, const ShapeSphere* sphereB,
+		const Vec3& posA, const Vec3& posB, Vec3& ptOnA, Vec3& ptOnB);
+
+	static bool Intersect(Body* a, Body* b, Contact& contact);
+
+ static bool ConservativeAdvance(Body& bodyA, Body& bodyB, float dt, Contact& contact);
+
 };
 

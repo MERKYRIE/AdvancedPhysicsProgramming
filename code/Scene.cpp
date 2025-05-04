@@ -6,6 +6,229 @@
 #include "../Intersections.h"
 #include "../Broadphase.h"
 
+/*
+========================================================================================================
+
+Models
+
+========================================================================================================
+*/
+
+static const float w = 50;
+static const float h = 25;
+
+Vec3 g_boxGround[] = {
+	Vec3(-w,-h, 0),
+	Vec3(w,-h, 0),
+	Vec3(-w, h, 0),
+	Vec3(w, h, 0),
+
+	Vec3(-w,-h,-1),
+	Vec3(w,-h,-1),
+	Vec3(-w, h,-1),
+	Vec3(w, h,-1),
+};
+
+Vec3 g_boxWall0[] = {
+	Vec3(-1,-h, 0),
+	Vec3(1,-h, 0),
+	Vec3(-1, h, 0),
+	Vec3(1, h, 0),
+
+	Vec3(-1,-h, 5),
+	Vec3(1,-h, 5),
+	Vec3(-1, h, 5),
+	Vec3(1, h, 5),
+};
+
+Vec3 g_boxWall1[] = {
+	Vec3(-w,-1, 0),
+	Vec3(w,-1, 0),
+	Vec3(-w, 1, 0),
+	Vec3(w, 1, 0),
+
+	Vec3(-w,-1, 5),
+	Vec3(w,-1, 5),
+	Vec3(-w, 1, 5),
+	Vec3(w, 1, 5),
+};
+
+Vec3 g_boxUnit[] = {
+	Vec3(-1,-1,-1),
+	Vec3(1,-1,-1),
+	Vec3(-1, 1,-1),
+	Vec3(1, 1,-1),
+
+	Vec3(-1,-1, 1),
+	Vec3(1,-1, 1),
+	Vec3(-1, 1, 1),
+	Vec3(1, 1, 1),
+};
+
+static const float t = 0.25f;
+Vec3 g_boxSmall[] = {
+	Vec3(-t,-t,-t),
+	Vec3(t,-t,-t),
+	Vec3(-t, t,-t),
+	Vec3(t, t,-t),
+
+	Vec3(-t,-t, t),
+	Vec3(t,-t, t),
+	Vec3(-t, t, t),
+	Vec3(t, t, t),
+};
+
+static const float l = 3.0f;
+Vec3 g_boxBeam[] = {
+	Vec3(-l,-t,-t),
+	Vec3(l,-t,-t),
+	Vec3(-l, t,-t),
+	Vec3(l, t,-t),
+
+	Vec3(-l,-t, t),
+	Vec3(l,-t, t),
+	Vec3(-l, t, t),
+	Vec3(l, t, t),
+};
+
+Vec3 g_boxPlatform[] = {
+	Vec3(-l,-l,-t),
+	Vec3(l,-l,-t),
+	Vec3(-l, l,-t),
+	Vec3(l, l,-t),
+
+	Vec3(-l,-l, t),
+	Vec3(l,-l, t),
+	Vec3(-l, l, t),
+	Vec3(l, l, t),
+};
+
+static const float t2 = 0.25f;
+static const float w2 = t2 * 2.0f;
+static const float h3 = t2 * 4.0f;
+Vec3 g_boxBody[] = {
+	Vec3(-t2,-w2,-h3),
+	Vec3(t2,-w2,-h3),
+	Vec3(-t2, w2,-h3),
+	Vec3(t2, w2,-h3),
+
+	Vec3(-t2,-w2, h3),
+	Vec3(t2,-w2, h3),
+	Vec3(-t2, w2, h3),
+	Vec3(t2, w2, h3),
+};
+
+static const float h2 = 0.25f;
+Vec3 g_boxLimb[] = {
+	Vec3(-h3,-h2,-h2),
+	Vec3(h3,-h2,-h2),
+	Vec3(-h3, h2,-h2),
+	Vec3(h3, h2,-h2),
+
+	Vec3(-h3,-h2, h2),
+	Vec3(h3,-h2, h2),
+	Vec3(-h3, h2, h2),
+	Vec3(h3, h2, h2),
+};
+
+Vec3 g_boxHead[] = {
+	Vec3(-h2,-h2,-h2),
+	Vec3(h2,-h2,-h2),
+	Vec3(-h2, h2,-h2),
+	Vec3(h2, h2,-h2),
+
+	Vec3(-h2,-h2, h2),
+	Vec3(h2,-h2, h2),
+	Vec3(-h2, h2, h2),
+	Vec3(h2, h2, h2),
+};
+
+Vec3 g_diamond[7 * 8];
+void FillDiamond()
+{
+	Vec3 pts[4 + 4];
+	pts[0] = Vec3(0.1f, 0, -1);
+	pts[1] = Vec3(1, 0, 0);
+	pts[2] = Vec3(1, 0, 0.1f);
+	pts[3] = Vec3(0.4f, 0, 0.4f);
+
+	const float pi = acosf(-1.0f);
+	const Quat quatHalf(Vec3(0, 0, 1), 2.0f * pi * 0.125f * 0.5f);
+	pts[4] = Vec3(0.8f, 0, 0.3f);
+	pts[4] = quatHalf.RotatePoint(pts[4]);
+	pts[5] = quatHalf.RotatePoint(pts[1]);
+	pts[6] = quatHalf.RotatePoint(pts[2]);
+
+	const Quat quat(Vec3(0, 0, 1), 2.0f * pi * 0.125f);
+	int idx = 0;
+	for (int i = 0; i < 7; i++) {
+		g_diamond[idx] = pts[i];
+		idx++;
+	}
+
+	Quat quatAccumulator;
+	for (int i = 1; i < 8; i++) {
+		quatAccumulator = quatAccumulator * quat;
+		for (int pt = 0; pt < 7; pt++) {
+			g_diamond[idx] = quatAccumulator.RotatePoint(pts[pt]);
+			idx++;
+		}
+	}
+}
+
+void AddStandardSandBox(std::vector<Body>& bodies) {
+	Body body;
+
+	body.position = Vec3(0, 0, 0);
+	body.orientation = Quat(0, 0, 0, 1);
+	body.linearVelocity.Zero();
+	body.angularVelocity.Zero();
+	body.inverseMass = 0.0f;
+	body.elasticity = 0.5f;
+	body.friction = 0.5f;
+	body.shape = new ShapeBox(g_boxGround, sizeof(g_boxGround) / sizeof(Vec3));
+	bodies.push_back(body);
+
+	body.position = Vec3(50, 0, 0);
+	body.orientation = Quat(0, 0, 0, 1);
+	body.linearVelocity.Zero();
+	body.angularVelocity.Zero();
+	body.inverseMass = 0.0f;
+	body.elasticity = 0.5f;
+	body.friction = 0.0f;
+	body.shape = new ShapeBox(g_boxWall0, sizeof(g_boxWall0) / sizeof(Vec3));
+	bodies.push_back(body);
+
+	body.position = Vec3(-50, 0, 0);
+	body.orientation = Quat(0, 0, 0, 1);
+	body.linearVelocity.Zero();
+	body.angularVelocity.Zero();
+	body.inverseMass = 0.0f;
+	body.elasticity = 0.5f;
+	body.friction = 0.0f;
+	body.shape = new ShapeBox(g_boxWall0, sizeof(g_boxWall0) / sizeof(Vec3));
+	bodies.push_back(body);
+
+	body.position = Vec3(0, 25, 0);
+	body.orientation = Quat(0, 0, 0, 1);
+	body.linearVelocity.Zero();
+	body.angularVelocity.Zero();
+	body.inverseMass = 0.0f;
+	body.elasticity = 0.5f;
+	body.friction = 0.0f;
+	body.shape = new ShapeBox(g_boxWall1, sizeof(g_boxWall1) / sizeof(Vec3));
+	bodies.push_back(body);
+
+	body.position = Vec3(0, -25, 0);
+	body.orientation = Quat(0, 0, 0, 1);
+	body.linearVelocity.Zero();
+	body.angularVelocity.Zero();
+	body.inverseMass = 0.0f;
+	body.elasticity = 0.5f;
+	body.friction = 0.0f;
+	body.shape = new ShapeBox(g_boxWall1, sizeof(g_boxWall1) / sizeof(Vec3));
+	bodies.push_back(body);
+}
 
 /*
 ========================================================================================================
@@ -48,40 +271,28 @@ Scene::Initialize
 */
 void Scene::Initialize() {
 	Body body;
-	for (int i = 0; i < 6; ++i)
-	{
-		for (int j = 0; j < 6; ++j)
-		{
-			float radius = 0.5f;
-			float x = (i - 1) * radius * 1.5f;
-			float y = (j - 1) * radius * 1.5f;
-			body.position = Vec3(x, y, 10);
-			body.orientation = Quat(0, 0, 0, 1);
-			body.shape = new ShapeSphere(radius);
-			body.inverseMass = 1.0f;
-			body.elasticity = 0.01f;
-			body.friction = 0.999f;
-			body.linearVelocity.Zero();
-			bodies.push_back(body);
-		}
-	}
 
-	for (int i = 0; i < 3; ++i)
-	{
-		for (int j = 0; j < 3; ++j)
-		{
-			float radius = 80.0f;
-			float x = (i - 1) * radius * 0.25f;
-			float y = (j - 1) * radius * 0.25f;
-			body.position = Vec3(x, y, -radius);
-			body.orientation = Quat(0, 0, 0, 1);
-			body.shape = new ShapeSphere(radius);
-			body.inverseMass = 0.0f;
-			body.elasticity = 0.99f;
-			body.friction = 0.5f;
-			bodies.push_back(body);
-		}
-	}
+	body.position = Vec3(10, 0, 3);
+	body.orientation = Quat(0, 0, 0, 1);
+	body.linearVelocity = Vec3(-100, 0, 0);
+	body.angularVelocity = Vec3(0.0f, 0.0f, 0.0f);
+	body.inverseMass = 1.0f;
+	body.elasticity = 0.5f;
+	body.friction = 0.5f;
+	body.shape = new ShapeSphere(0.5f);
+	bodies.push_back(body);
+
+	body.position = Vec3(-10, 0, 3);
+	body.orientation = Quat(0, 0, 0, 1);
+	body.linearVelocity = Vec3(100, 0, 0);
+	body.angularVelocity = Vec3(0, 10, 0);
+	body.inverseMass = 1.0f;
+	body.elasticity = 0.5f;
+	body.friction = 0.5f;
+	body.shape = new ShapeConvex(g_diamond, sizeof(g_diamond) / sizeof(Vec3));
+	bodies.push_back(body);
+
+	AddStandardSandBox(bodies);
 }
 
 /*
